@@ -18,7 +18,7 @@ listTweets = [] # lista com os tweets, apenas
 mPolaridade = [] # Lista para armazenar polaridades
 mSubjetividade = [] # Lista para armazenar subjetividades
 
-def ResetaArquivo(pasta, arq):
+def limpa_arqv(pasta, arq):
     print('\n' + '=='*50 + '\n')
     d = os.listdir(pasta)
     if arq in d: # se existir arquivo no diretorio, ele é deletado
@@ -31,7 +31,7 @@ def ResetaArquivo(pasta, arq):
         print('=='*50)
 
 
-def PegaTweetsTwint(dado):
+def tweets_twint(dado):
     c = twint.Config() # seta configuração para a pesquisa
     c.Search = dado # o que será pesquisado
     c.Limit = qtd # quantos tweets serão exibidos. 1 = 20 tweets.
@@ -43,14 +43,14 @@ def PegaTweetsTwint(dado):
     print('\n' + '=='*50)
 
 
-def GeraVetorTweets(): # Abre o txt com os tweets salvos
+def vetor_tweets(): # Abre o txt com os tweets salvos
     with open(diretorio + txt, 'r', encoding="utf8") as texto:
         for conteudo in texto.readlines(): #enquanto tiver linha, salva cada linha no vetor
             tweet = conteudo.split('|')
             tws.append(tweet[3].replace('Tweet:', '').replace('\n', '').replace('\\', '|')) 
             # Vetor salva todos os tweets ( apenas os tweets )
 
-def GeraAnalise():
+def analise_tweets():
     for tweets in tws:
         analise = TextBlob(tweets)
         polaridade = analise.sentiment.polarity
@@ -60,7 +60,7 @@ def GeraAnalise():
         mSubjetividade.append(subjetividade)
         print(f'\n Tweet: {tweets} \n Polaridade: {polaridade:.02f} \n Subjetividade: {subjetividade:.02f}')
 
-def GeraJsonBoxBlock():
+def gera_json():
     listJson = []
     with open(diretorio + jsonBox, 'a') as jb:
         for i in range(0, len(listTweets)): # pode ser usado qualquer um dos 3 vetores, já que o tamanho é igual
@@ -70,21 +70,21 @@ def GeraJsonBoxBlock():
             listJson.append(j)
         json.dump(listJson, jb)
         
-def GeraBox():
+def gera_box():
     dados = pd.read_json(diretorio + jsonBox)
     print('\n Boxplot dos tweets:')
     dados.boxplot(column=['Polaridade','Subjetividade'],vert=False)
     mpl.show()
 
- 
-ResetaArquivo(diretorio, txt) # Deleta o arquivo de tweet, caso ele já exista 
+
+limpa_arqv(diretorio, txt) # Deleta o arquivo de tweet, caso ele já exista 
 p = input(str('O que pretende pesquisar? \n'))
-PegaTweetsTwint(p) # Lista os 20 tweets
-GeraVetorTweets() # Vetor com as frases criado
-GeraAnalise() # printa os tweets, com as respectivas polaridades e subjetividades
+tweets_twint(p) # Lista os 20 tweets
+vetor_tweets() # Vetor com as frases criado
+analise_tweets() # printa os tweets, com as respectivas polaridades e subjetividades
 print('=='*50 + '\n')
 print(f'Média de polaridade: {np.mean(mPolaridade):.02f}') # -1 = neg \\ 1 = posi
 print(f'Média de subjetividade: {np.mean(mSubjetividade):.02f}') # 1 = subjetivo
-ResetaArquivo(diretorio, jsonBox) # Deleta o json caso ele já exista 
-GeraJsonBoxBlock() # Gera o Json com os tweets pesquisados
-GeraBox() # Gera o boxplot
+limpa_arqv(diretorio, jsonBox) # Deleta o json caso ele já exista 
+gera_json() # Gera o Json com os tweets pesquisados
+gera_box() # Gera o boxplot
